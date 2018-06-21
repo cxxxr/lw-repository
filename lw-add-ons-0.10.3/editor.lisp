@@ -400,6 +400,7 @@ current point onto *FIND-DEFINITIONS-STACK*.")
   (editor::complete-string string *all-asdf-systems*
                            :ignore-case t))
 
+#|
 (defun prompt-for-asdf-system (string &optional prompt help no-check)
   "Prompts for an ASDF system name with STRING being the default."
   (let ((*all-asdf-systems* (list-asdf-systems)))
@@ -420,6 +421,7 @@ current point onto *FIND-DEFINITIONS-STACK*.")
      :type :string
      :default-in-prompt nil
      :complete-func 'complete-system)))
+|#
 
 (defun prompt-for-asdf-system-with-default (&optional prompt help no-check)
   "Prompts for an ASDF system name and tries to find a default in the

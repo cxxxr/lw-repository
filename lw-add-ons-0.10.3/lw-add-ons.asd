@@ -73,7 +73,7 @@
                #+(and :win32 (not :console-image)) (:file "ide-server")
                (:file "apropos")
                (:file "completions")
-               (:file "systems")
+               ;(:file "systems")
                (:file "editor")
                (:file "commands"))
   :depends-on (:lw-doc))
