@@ -1,0 +1,100 @@
+;; -*- mode:lisp -*-
+
+(load-all-patches)
+
+;;; The following lines added by ql:add-to-init-file:
+#-quicklisp
+(let ((quicklisp-init (merge-pathnames "quicklisp/setup.lisp" (user-homedir-pathname))))
+  (when (probe-file quicklisp-init)
+    (load quicklisp-init)))
+
+(asdf:initialize-source-registry
+ '(:source-registry
+   (:tree (:home "lw-repository"))
+   :INHERIT-CONFIGURATION))
+
+(ql:quickload :lw-add-ons)
+
+(lw:set-default-character-element-type 'cl:character)
+
+(setq stream::*default-external-format* '(:utf-8 :eol-style :lf))
+
+(defun utf-8-file-encoding (pathname ef-spec buffer length)
+  (declare (ignore buffer length))
+  (if (assoc (pathname-type pathname) graphics-ports::*file-types-to-image-types*
+             :test #'equalp)
+      '(:latin-1)
+      (system:merge-ef-specs ef-spec '(:utf-8 :use-replacement t))))
+
+(setq system:*file-encoding-detection-algorithm*
+      '(utf-8-file-encoding))
+
+(defcommand "Forward Empty Line" (p) "" ""
+  (declare (ignore p))
+  (let ((point (current-point)))
+    (loop
+     (unless (line-offset point 1) (return))
+     (when (string= "" (string-trim '(#\space #\tab) (line-string point)))
+       (return)))))
+
+(defcommand "Backward Empty Line" (p) "" ""
+  (declare (ignore p))
+  (let ((point (current-point)))
+    (loop
+     (unless (line-offset point -1) (return))
+     (when (string= "" (string-trim '(#\space #\tab) (line-string point)))
+       (return)))))
+
+(defcommand "Delete trailing whitespace" (p) "" ""
+  (declare (ignore p))
+  (with-point ((point (buffers-start (current-buffer)) :before-insert))
+    (loop
+     (line-end point)
+     (with-point ((end point))
+       (loop :while (eql #\space (character-at point -1))
+             :do (character-offset point -1))
+       (delete-between-points point end)
+       (unless (line-offset point 1) (return))))))
+
+;(setq lw-tools::*lw-splash-screen-min-time* 0)
+
+(setf *inspect-through-gui* t)
+
+(lw:define-action
+ "Initialize LispWorks tools"
+ "Create default the tools"
+ (lambda (screen)
+   (capi:find-interface 'lw-tools:listener :screen screen)
+   ;(capi:find-interface 'lw-tools:editor :screen screen)
+   (lispworks-tools::dismiss-lw-splash-screen))
+ :after "Configuration restored")
+
+(load-logical-pathname-translations "EDITOR-SRC")
+(setf dspec:*active-finders*
+      (append dspec:*active-finders*
+              (list "EDITOR-SRC:editor-tags-db")))
+
+(setf (editor:variable-value 'editor:backups-wanted :global) nil)
+(setf (editor:variable-value 'editor::evaluate-defvar-action :global) :reevaluate)
+
+(setup-indent "if" 1 4 4)
+(setup-indent "defparser" 1)
+
+(bind-key "Comment Region" #("Control-c" "Control-i"))
+(bind-key "Uncomment Region" #("Control-c" "Control-o"))
+
+(bind-key "Compile Defun" #("Control-c" "Control-c") :mode "Lisp")
+(bind-key "Compile and Load Buffer File" #("Control-c" "Control-k") :mode "Lisp")
+(bind-key "Edit Callers" #("Control-c" #\<) :mode "Lisp")
+(bind-key "Edit Callees" #("Control-c" #\>) :mode "Lisp")
+
+(bind-key "Clear Listener" #("Control-c" "Control-l") :mode "Execute")
+
+(bind-key "Tools Listener" "F12")
+(bind-key "Tools Editor" "F11")
+
+(bind-key "Macroexpand Form" #("Control-c" "Return"))
+(bind-key "Walk Form" #("Control-x" "Return"))
+
+(bind-key "Forward Empty Line" #("Meta-}"))
+(bind-key "Backward Empty Line" #("Meta-{"))
