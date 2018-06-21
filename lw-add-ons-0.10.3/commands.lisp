@@ -374,3 +374,30 @@ described in a help window."
   (editor::funcall-background-job-with-typeout
      (editor::choose-lispeval-pane (current-buffer) (current-window))
      'ql:update-all-dists))
+
+(defcommand "Forward Empty Line" (p) "" ""
+  (declare (ignore p))
+  (let ((point (current-point)))
+    (loop
+     (unless (line-offset point 1) (return))
+     (when (string= "" (string-trim '(#\space #\tab) (line-string point)))
+       (return)))))
+
+(defcommand "Backward Empty Line" (p) "" ""
+  (declare (ignore p))
+  (let ((point (current-point)))
+    (loop
+     (unless (line-offset point -1) (return))
+     (when (string= "" (string-trim '(#\space #\tab) (line-string point)))
+       (return)))))
+
+(defcommand "Delete trailing whitespace" (p) "" ""
+  (declare (ignore p))
+  (with-point ((point (buffers-start (current-buffer)) :before-insert))
+    (loop
+     (line-end point)
+     (with-point ((end point))
+       (loop :while (eql #\space (character-at point -1))
+             :do (character-offset point -1))
+       (delete-between-points point end)
+       (unless (line-offset point 1) (return))))))

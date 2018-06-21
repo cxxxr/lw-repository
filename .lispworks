@@ -29,33 +29,6 @@
 (setq system:*file-encoding-detection-algorithm*
       '(utf-8-file-encoding))
 
-(defcommand "Forward Empty Line" (p) "" ""
-  (declare (ignore p))
-  (let ((point (current-point)))
-    (loop
-     (unless (line-offset point 1) (return))
-     (when (string= "" (string-trim '(#\space #\tab) (line-string point)))
-       (return)))))
-
-(defcommand "Backward Empty Line" (p) "" ""
-  (declare (ignore p))
-  (let ((point (current-point)))
-    (loop
-     (unless (line-offset point -1) (return))
-     (when (string= "" (string-trim '(#\space #\tab) (line-string point)))
-       (return)))))
-
-(defcommand "Delete trailing whitespace" (p) "" ""
-  (declare (ignore p))
-  (with-point ((point (buffers-start (current-buffer)) :before-insert))
-    (loop
-     (line-end point)
-     (with-point ((end point))
-       (loop :while (eql #\space (character-at point -1))
-             :do (character-offset point -1))
-       (delete-between-points point end)
-       (unless (line-offset point 1) (return))))))
-
 ;(setq lw-tools::*lw-splash-screen-min-time* 0)
 
 (setf *inspect-through-gui* t)
@@ -77,24 +50,24 @@
 (setf (editor:variable-value 'editor:backups-wanted :global) nil)
 (setf (editor:variable-value 'editor::evaluate-defvar-action :global) :reevaluate)
 
-(setup-indent "if" 1 4 4)
-(setup-indent "defparser" 1)
+(editor:setup-indent "if" 1 4 4)
+(editor:setup-indent "defparser" 1)
 
-(bind-key "Comment Region" #("Control-c" "Control-i"))
-(bind-key "Uncomment Region" #("Control-c" "Control-o"))
+(editor:bind-key "Comment Region" #("Control-c" "Control-i"))
+(editor:bind-key "Uncomment Region" #("Control-c" "Control-o"))
 
-(bind-key "Compile Defun" #("Control-c" "Control-c") :mode "Lisp")
-(bind-key "Compile and Load Buffer File" #("Control-c" "Control-k") :mode "Lisp")
-(bind-key "Edit Callers" #("Control-c" #\<) :mode "Lisp")
-(bind-key "Edit Callees" #("Control-c" #\>) :mode "Lisp")
+(editor:bind-key "Compile Defun" #("Control-c" "Control-c") :mode "Lisp")
+(editor:bind-key "Compile and Load Buffer File" #("Control-c" "Control-k") :mode "Lisp")
+(editor:bind-key "Edit Callers" #("Control-c" #\<) :mode "Lisp")
+(editor:bind-key "Edit Callees" #("Control-c" #\>) :mode "Lisp")
 
-(bind-key "Clear Listener" #("Control-c" "Control-l") :mode "Execute")
+(editor:bind-key "Clear Listener" #("Control-c" "Control-l") :mode "Execute")
 
-(bind-key "Tools Listener" "F12")
-(bind-key "Tools Editor" "F11")
+(editor:bind-key "Tools Listener" "F12")
+(editor:bind-key "Tools Editor" "F11")
 
-(bind-key "Macroexpand Form" #("Control-c" "Return"))
-(bind-key "Walk Form" #("Control-x" "Return"))
+(editor:bind-key "Macroexpand Form" #("Control-c" "Return"))
+(editor:bind-key "Walk Form" #("Control-x" "Return"))
 
-(bind-key "Forward Empty Line" #("Meta-}"))
-(bind-key "Backward Empty Line" #("Meta-{"))
+(editor:bind-key "Forward Empty Line" #("Meta-}"))
+(editor:bind-key "Backward Empty Line" #("Meta-{"))
