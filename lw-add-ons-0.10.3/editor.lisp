@@ -314,6 +314,7 @@ undo command.")
       (when *search-end*
         (delete-point *search-end*)))))
 
+#+(or)
 (defadvice (editor::find-next-ordinary-window allow-listener :around
                                               :documentation "Allows
 the \"Next Ordinary Window\" command to switch to a listener window.")
